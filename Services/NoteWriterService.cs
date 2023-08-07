@@ -7,16 +7,10 @@ namespace DnsNoteWriter.Services
     public class NoteWriterService
     {
         private readonly INoteWriter noteWriter;
-        private readonly IConfiguration configuration;
-        private readonly ILogger<NoteWriterService> logger;
 
-        public NoteWriterService(INoteWriter noteWriter,
-            IConfiguration configuration, 
-            ILogger<NoteWriterService> logger)
+        public NoteWriterService(INoteWriter noteWriter)
         {
             this.noteWriter = noteWriter;
-            this.configuration = configuration;
-            this.logger = logger;
         }
 
         public async Task Process()

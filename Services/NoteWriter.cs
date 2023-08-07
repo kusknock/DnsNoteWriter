@@ -48,7 +48,9 @@ namespace DnsNoteWriter.Services
 
             try
             {
-                var result = await client.MakeRequest<NoteResponse>(request);
+                Type resultType = typeof(Note);
+
+                var result = await client.MakeRequest<NoteResponse>(resultType, request);
 
                 if(result.Code != HttpStatusCode.OK)
                     throw new InvalidOperationException("Произошла ошибка:", result.Data as Exception);

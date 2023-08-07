@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
+﻿using DnsNoteWriter.Transport.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using DnsNoteWriter.Models;
-using DnsNoteWriter.Transport.Interfaces;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace DnsNoteWriter.Transport
 {
@@ -22,14 +14,14 @@ namespace DnsNoteWriter.Transport
             this.configuration = configuration;
         }
 
-        public async Task<TResponse> MakeRequest<TResponse>(IRequest request) 
+        public async Task<TResponse> MakeRequest<TResponse>(Type resultType, IRequest request = null)
             where TResponse : class, IResponse
         {
-            return await SendRequest(request, Activator.CreateInstance<TResponse>());
+            return await SendRequest(request, Activator.CreateInstance<TResponse>(), resultType);
         }
 
-        private async Task<TResponse> SendRequest<TResponse>(IRequest request, 
-            TResponse response) where TResponse : class, IResponse
+        private async Task<TResponse> SendRequest<TResponse>(IRequest request,
+            TResponse response, Type resultType) where TResponse : class, IResponse
         {
             if (request is null)
                 throw new ArgumentNullException(nameof(request));
@@ -45,7 +37,7 @@ namespace DnsNoteWriter.Transport
                     try
                     {
                         var result = await client.PostAsync(request.ApiUrl, content);
-                        Note? person = await result.Content.ReadFromJsonAsync<Note>();
+                        var person = await result.Content.ReadFromJsonAsync(resultType);
                         return response.InitializeResponse(result.StatusCode, person) as TResponse;
                     }
                     catch (HttpRequestException ex) when (ex.StatusCode != HttpStatusCode.OK)
